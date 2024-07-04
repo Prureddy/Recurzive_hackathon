@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Care ChatBot</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css')}}">
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <style>
+        /* Custom CSS for sidebar and chat layout */
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .sidebar {
+            background-color: #343a40;
+            color: #fff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .sidebar h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+        .sidebar p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .sidebar ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .sidebar ul li {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .chat-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .user-message {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
+        }
+        .bot-message {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-end;
+        }
+        .message-bubble {
+            background-color: #ffffff;
+            border-radius: 15px;
+            padding: 15px 20px;
+            max-width: 80%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .message-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 10%;
+            border-style: solid;
+            border-width: 15px 15px 0;
+            border-color: #ffffff transparent;
+            display: block;
+            width: 0;
+            z-index: 1;
+        }
+        .message-time {
+            font-size: 12px;
+            color: #666;
+            margin-left: 10px;
+            align-self: flex-end;
+        }
+        .user-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .fa-microphone-alt {
+            color: #007bff;
+        }
+        .send-btn {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: #fff;
+        }
+        .send-btn:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .sidebar-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        .chat-icon {
+            font-size: 24px;
+            margin-left: 10px;
+        }
+        .quick-links {
+            margin-top: 30px;
+        }
+        .quick-links a {
+            display: block;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease;
+        }
+        .quick-links a:hover {
+            background-color: #0056b3;
+        }
+        .quick-links i {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            <!-- Sidebar -->
+            <div class="col-md-3 sidebar">
+                <div>
+                    <h3>Pet Care ChatBot</h3>
+                    <p>Welcome to the Pet Care ChatBot. Feel free to ask any questions related to pet care!</p>
+                </div>
+                <hr>
+                <div class="quick-links">
+                    <h5>Quick Links</h5>
+                    <a href="#"><i class="fas fa-paw sidebar-icon"></i> Dogs</a>
+                    <a href="#"><i class="fas fa-cat sidebar-icon"></i> Cats</a>
+                    <a href="#"><i class="fas fa-fish sidebar-icon"></i> Fish</a>
+                    <a href="#"><i class="fas fa-kiwi-bird sidebar-icon"></i> Birds</a>
+                    <a href="#"><i class="fas fa-paw sidebar-icon"></i> Other Pets</a>
+                </div>
+            </div>
+
+            <!-- Chat Container -->
+            <div class="col-md-9 chat-container">
+                <div class="chat-header">
+                    <span>Chat with Pet Care ChatBot</span>
+                    <i class="fas fa-paw chat-icon"></i>
+                </div>
+                <div id="messageForm" class="chat-messages">
+                    <!-- Messages will be dynamically added here -->
+                </div>
+                <div class="card-footer">
+                    <form id="messageArea" class="input-group" enctype="multipart/form-data">
+                        <input type="text" id="text" name="msg" placeholder="Type your question..." autocomplete="off" class="form-control type_msg" required style="flex: 1;"/>
+                        <div class="input-group-append">
+                            <button type="submit" id="send" class="btn btn-primary send-btn"><i class="fas fa-location-arrow"></i></button>
+                            <button type="button" id="voiceButton" class="btn btn-light"><i class="fas fa-microphone-alt fa-lg"></i></button>
+                        </div>
+                        <select id="langSelect" class="custom-select ml-2" style="width: 100px;">
+    <option value="en">English</option>
+    <option value="es">Spanish</option>
+    <option value="fr">French</option>
+    <option value="de">German</option>
+    <option value="it">Italian</option>
+    <option value="hi">Hindi</option>
+    <option value="bn">Bengali</option>
+    <option value="te">Telugu</option>
+    <option value="mr">Marathi</option>
+    <option value="ta">Tamil</option>
+    <option value="gu">Gujarati</option>
+    <option value="kn">Kannada</option>
+    <option value="ur">Urdu</option>
+    <option value="ml">Malayalam</option>
+    <option value="pa">Punjabi</option>
+    <option value="or">Odia</option>
+</select>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and Custom JavaScript -->
+    <script>
+        $(document).ready(function() {
+            // Function to handle voice input
+            function handleVoiceInput() {
+                $.ajax({
+                    type: "POST",
+                    url: "/voice",  // Flask route for voice input
+                    data: {
+                        lang: $("#langSelect").val()  // Pass selected language to server
+                    },
+                    success: function(data) {
+                        console.log("Voice input response:", data);
+                        var botHtml = '<div class="bot-message"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="user-img"><div class="message-bubble">' + data.response + '<span class="message-time">' + getCurrentTime() + '</span></div></div>';
+                        $("#messageForm").append(botHtml); // Append bot response to the chat window
+                        scrollToBottom(); // Ensure the chat window scrolls to the bottom
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error:", error); // Log any errors to the console
+                    }
+                });
+            }
+
+            // Voice input button click handler
+            $('#voiceButton').on('click', function() {
+                handleVoiceInput();
+            });
+
+            // Form submission handler
+            $("#messageArea").on("submit", function(event) {
+                event.preventDefault(); // Prevent the form from submitting normally
+
+                const date = new Date();
+                const hour = date.getHours();
+                const minute = date.getMinutes();
+                const str_time = hour + ":" + (minute < 10 ? "0" + minute : minute); // Format minutes with leading zero if needed
+
+                var formData = new FormData(this); // FormData to handle text and file inputs
+                var rawText = $("#text").val().trim(); // Trim whitespace from input
+
+                // If input is empty, do nothing
+                if (rawText === "") {
+                    return;
+                }
+
+                var userHtml = '<div class="user-message"><div class="message-bubble">' + rawText + '<span class="message-time">' + str_time + '</span></div><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="user-img"></div>';
+
+                $("#text").val(""); // Clear the input field
+                $("#messageForm").append(userHtml); // Append user message to the chat window
+                scrollToBottom(); // Ensure the chat window scrolls to the bottom
+
+                // Send user message to the server
+                $.ajax({
+                    type: "POST",
+                    url: "/get",  // Flask route for text input
+                    data: {
+                        msg: rawText,
+                        lang: $("#langSelect").val()  // Pass selected language to server
+                    },
+                    success: function(data) {
+                        console.log("Text input response:", data);
+                        var botHtml = '<div class="bot-message"><img src="https://i.ibb.co/fSNP7Rz/icons8-chatgpt-512.png" class="user-img"><div class="message-bubble">' + data.response + '<span class="message-time">' + getCurrentTime() + '</span></div></div>';
+                        $("#messageForm").append(botHtml); // Append bot response to the chat window
+                        scrollToBottom(); // Ensure the chat window scrolls to the bottom
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error:", error); // Log any errors to the console
+                    }
+                });
+            });
+
+            // Function to ensure the chat window scrolls to the bottom
+            function scrollToBottom() {
+                $("#messageForm").animate({
+                    scrollTop: $("#messageForm")[0].scrollHeight
+                }, 1000);
+            }
+
+            // Function to get current time in HH:MM format
+            function getCurrentTime() {
+                var date = new Date();
+                var hours = date.getHours();
+                var minutes = date.getMinutes();
+                var currentTime = hours + ":" + (minutes < 10 ? "0" + minutes : minutes);
+                return currentTime;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+Flask
+openai
+SpeechRecognition
+pyttsx3
+langchain
+langchain-community
