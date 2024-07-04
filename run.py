@@ -8,6 +8,7 @@ from langchain.chains import ConversationChain
 from langchain_openai import ChatOpenAI
 import logging
 
+
 # Initialize logging
 logging.basicConfig(level=logging.DEBUG)
 
